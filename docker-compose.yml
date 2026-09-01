@@ -1,0 +1,48 @@
+services:
+  database:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: blog_app
+      POSTGRES_USER: blog_user
+      POSTGRES_PASSWORD: change_this_for_production
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./server/database.sql:/docker-entrypoint-initdb.d/001_base.sql:ro
+      - ./server/migrations/001_scale_up.sql:/docker-entrypoint-initdb.d/002_scale_up.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U blog_user -d blog_app"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: ./server
+    environment:
+      PORT: 4000
+      DB_HOST: database
+      DB_PORT: 5432
+      DB_NAME: blog_app
+      DB_USER: blog_user
+      DB_PASSWORD: change_this_for_production
+      JWT_SECRET: change_this_to_a_long_random_secret
+      CLIENT_URL: http://localhost:3000
+    ports:
+      - "4000:4000"
+    depends_on:
+      database:
+        condition: service_healthy
+
+  web:
+    build:
+      context: ./client
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:4000/api
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:
