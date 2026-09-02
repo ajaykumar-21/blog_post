@@ -1,0 +1,60 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  ci-check:
+    name: Run Tests & Verify Build
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: blog_app_test
+          POSTGRES_USER: blog_user
+          POSTGRES_PASSWORD: test_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install All Dependencies
+        run: npm run install:all
+
+      - name: Run Database Migrations
+        run: |
+          PGPASSWORD=test_password psql -h localhost -U blog_user -d blog_app_test -f server/database.sql
+          PGPASSWORD=test_password psql -h localhost -U blog_user -d blog_app_test -f server/migrations/001_scale_up.sql
+
+      - name: Run Backend Tests
+        env:
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_NAME: blog_app_test
+          DB_USER: blog_user
+          DB_PASSWORD: test_password
+          JWT_SECRET: test_jwt_secret_key_123
+        run: npm test
+
+      - name: Verify Frontend Build
+        env:
+          NEXT_PUBLIC_API_URL: https://dummy-api.onrender.com/api
+        run: npm run build
