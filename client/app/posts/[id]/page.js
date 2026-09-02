@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { use, useEffect, useState } from 'react';
-import { api, getSession } from '../../../lib/api';
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { use, useEffect, useState } from "react";
+import { api, getSession } from "../../../lib/api";
 
 function Comment({ item, replies, session, onReply, onDelete }) {
   return (
@@ -19,7 +19,10 @@ function Comment({ item, replies, session, onReply, onDelete }) {
         </button>
       )}
       {session?.user.id === item.user_id && (
-        <button className="text-button danger" onClick={() => onDelete(item.id)}>
+        <button
+          className="text-button danger"
+          onClick={() => onDelete(item.id)}
+        >
           Delete
         </button>
       )}
@@ -29,7 +32,10 @@ function Comment({ item, replies, session, onReply, onDelete }) {
           <small> · {new Date(reply.created_at).toLocaleDateString()}</small>
           <p>{reply.content}</p>
           {session?.user.id === reply.user_id && (
-            <button className="text-button danger" onClick={() => onDelete(reply.id)}>
+            <button
+              className="text-button danger"
+              onClick={() => onDelete(reply.id)}
+            >
               Delete
             </button>
           )}
@@ -44,9 +50,9 @@ export default function PostPage({ params }) {
   const { id } = use(params);
   const [post, setPost] = useState(null);
   const [session, setSession] = useState(null);
-  const [content, setContent] = useState('');
+  const [content, setContent] = useState("");
   const [replyTo, setReplyTo] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const load = async () => {
     try {
@@ -62,10 +68,18 @@ export default function PostPage({ params }) {
   }, [id]);
 
   const deletePost = async () => {
-    if (!confirm('Are you sure you want to delete this post? This cannot be undone.')) return;
+    if (
+      !confirm(
+        "Are you sure you want to delete this post? This cannot be undone.",
+      )
+    )
+      return;
     try {
-      await api(`/posts/${post.id}`, { method: 'DELETE', token: session.token });
-      router.push('/');
+      await api(`/posts/${post.id}`, {
+        method: "DELETE",
+        token: session.token,
+      });
+      router.push("/");
     } catch (requestError) {
       setError(requestError.message);
     }
@@ -75,11 +89,11 @@ export default function PostPage({ params }) {
     event.preventDefault();
     try {
       await api(`/posts/${post.id}/comments`, {
-        method: 'POST',
+        method: "POST",
         token: session.token,
         body: JSON.stringify({ content, parentId: replyTo }),
       });
-      setContent('');
+      setContent("");
       setReplyTo(null);
       load();
     } catch (requestError) {
@@ -88,9 +102,12 @@ export default function PostPage({ params }) {
   };
 
   const deleteComment = async (commentId) => {
-    if (!confirm('Delete this comment and any replies?')) return;
+    if (!confirm("Delete this comment and any replies?")) return;
     try {
-      await api(`/posts/comments/${commentId}`, { method: 'DELETE', token: session.token });
+      await api(`/posts/comments/${commentId}`, {
+        method: "DELETE",
+        token: session.token,
+      });
       load();
     } catch (requestError) {
       setError(requestError.message);
@@ -115,7 +132,8 @@ export default function PostPage({ params }) {
   }
 
   const roots = post.comments.filter((item) => !item.parent_id);
-  const replies = (commentId) => post.comments.filter((item) => item.parent_id === commentId);
+  const replies = (commentId) =>
+    post.comments.filter((item) => item.parent_id === commentId);
   const isAuthor = session?.user && session.user.id === post.author_id;
 
   return (
@@ -124,7 +142,13 @@ export default function PostPage({ params }) {
         ← Back to stories
       </Link>
       <article className="post-detail">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
           <small>
             BY {post.author} · {new Date(post.created_at).toLocaleDateString()}
           </small>
@@ -160,9 +184,13 @@ export default function PostPage({ params }) {
 
         {session ? (
           <form onSubmit={submitComment}>
-            <h3>{replyTo ? 'Reply to comment' : 'Add a comment'}</h3>
+            <h3>{replyTo ? "Reply to comment" : "Add a comment"}</h3>
             {replyTo && (
-              <button type="button" className="text-button" onClick={() => setReplyTo(null)}>
+              <button
+                type="button"
+                className="text-button"
+                onClick={() => setReplyTo(null)}
+              >
                 Cancel reply
               </button>
             )}

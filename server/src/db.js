@@ -1,10 +1,10 @@
-import pg from 'pg';
-import dotenv from 'dotenv';
+import pg from "pg";
+import dotenv from "dotenv";
 
 dotenv.config();
 
 const { Pool } = pg;
-const isProduction = process.env.NODE_ENV === 'production';
+const isProduction = process.env.NODE_ENV === "production";
 
 export const pool = new Pool(
   process.env.DATABASE_URL
@@ -24,5 +24,5 @@ export const pool = new Pool(
         max: Number(process.env.DB_POOL_MAX || 10),
         idleTimeoutMillis: 30000,
         connectionTimeoutMillis: 5000,
-      }
+      },
 );
