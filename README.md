@@ -80,4 +80,4 @@ npm run docker:up # start the full stack in Docker
 
 ## Docker
 
-`docker compose` starts PostgreSQL, the API, and the web app. On first start it applies the base schema and migration automatically. Change the example database password and JWT secret in `docker-compose.yml` before using it outside local development.
+`docker compose` starts PostgreSQL, the API, and the web app. On first start it applies the base schema and migration automatically. Change the example database password and JWT secret in `docker-compose.yml` before using it outside local development..
